@@ -1,30 +1,41 @@
-version: 1
-type: "multi-grpc"
-ports: "5000"
-filters:
-  tags:
-    only: 'v.*'
-  branches:
-    only: '.*'
-parameter-server:
-  container: "tensorflow/tensorflow:1.13.1-py3"
-  command: "pip install -r requirements.txt && python mnist.py"
-  machine-type: "G1"
-  count: 1
-worker:
-  container: "tensorflow/tensorflow:1.13.1-gpu-py3"
-  command: "pip install -r requirements.txt && python mnist.py"
-  machine-type: "K80"
-  count: 2
-model:
-  type: Tensorflow
-  path: '/artifacts'
-checks:
-  tensorflow:loss:
-    target: 0.0..1.0
-    aggregate: max
-  tensorflow:accuracy:
-    target: 0.988..1.000
-    aggregate: median
-  defaults:
-    precision: 3
+version: 2
+workflows:
+#   experiment-workflow:
+#     steps:
+#       - name: "singlenode-gradientci"
+#         command: experiment.run_single_node
+#         params:
+#           command: python mnist.py
+#           container: tensorflow/tensorflow:1.13.1-gpu-py3
+#           experimentEnv:
+#             EPOCHS_EVAL: 5
+#             EVAL_SECS: 10
+#             MAX_STEPS: 1000
+#             TRAIN_EPOCHS: 10
+#           machineType: p2.xlarge
+#           modelPath: /artifacts
+#           modelType: Tensorflow
+#           name: mnist-cli-config-yaml
+#     triggers:
+#     branches:
+#         ignore: master
+#     tags:
+#         only:
+#         - v.*
+#         - latest
+  param-file-experiment-workflow:
+    steps:
+      - name: "param-file-experiment"
+        command: experiment.run_single_node
+        paramsFile: .ps_project/param-file-experiment.yaml
+        # checks: #[optional]
+        #   custom:loss:
+        #     target: "0.0..0.5"
+        #     aggregate: "/mean/0"
+    triggers:
+    branches:
+        only: master
+    tags:
+        only:
+        - v.*
+        - latest
