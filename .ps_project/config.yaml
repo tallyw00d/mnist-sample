@@ -1,5 +1,6 @@
-version: 1
+version: 2
 type: "multi-grpc"
+clusterId: clcjo828k
 ports: "5000"
 filters:
   tags:
@@ -9,16 +10,15 @@ filters:
 parameter-server:
   container: "tensorflow/tensorflow:1.13.1-py3"
   command: "pip install -r requirements.txt && python mnist.py"
-  machine-type: "G1"
+  machine-type: "c5.xlarge"
   count: 1
 worker:
   container: "tensorflow/tensorflow:1.13.1-gpu-py3"
   command: "pip install -r requirements.txt && python mnist.py"
-  machine-type: "K80"
+  machine-type: "p2.xlarge"
   count: 2
 model:
   type: Tensorflow
-  path: '/artifacts'
 checks:
   tensorflow:loss:
     target: 0.0..1.0
@@ -28,3 +28,4 @@ checks:
     aggregate: median
   defaults:
     precision: 3
+vpc: true
