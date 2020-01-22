@@ -1,30 +1,22 @@
-version: 1
-type: "multi-grpc"
-ports: "5000"
-filters:
-  tags:
-    only: 'v.*'
-  branches:
-    only: '.*'
-parameter-server:
-  container: "tensorflow/tensorflow:1.13.1-py3"
-  command: "pip install -r requirements.txt && python mnist.py"
-  machine-type: "G1"
-  count: 1
-worker:
-  container: "tensorflow/tensorflow:1.13.1-gpu-py3"
-  command: "pip install -r requirements.txt && python mnist.py"
-  machine-type: "K80"
-  count: 2
-model:
-  type: Tensorflow
-  path: '/artifacts'
-checks:
-  tensorflow:loss:
-    target: 0.0..1.0
-    aggregate: max
-  tensorflow:accuracy:
-    target: 0.988..1.000
-    aggregate: median
-  defaults:
-    precision: 3
+version: 2
+
+workflows:
+  multi-node:
+    steps:
+      -
+        command: experiment.run_multi_node
+        params:
+          experimentType: GRPC
+          workerCommand: "pip install -r requirements.txt && python mnist.py"
+          workerMachineType: "p2.xlarge"
+          workerContainer: tensorflow/tensorflow:1.13.1-gpu-py3
+          workerCount: 2
+          parameterServerCommand: "pip install -r requirements.txt && python mnist.py"
+          parameterServerMachineType: "c5.xlarge"
+          parameterServerContainer: tensorflow/tensorflow:1.13.1-gpu-py3
+          parameterServerCount: 1
+          experimentEnv: "{\"EPOCHS_EVAL\":\"5\",\"TRAIN_EPOCHS\":\"10\",\"MAX_STEPS\":\"1000\",\"EVAL_SECS\":\"10\"}"
+          model:
+            type: Tensorflow
+          clusterId: clcjo828k
+          vpc: true
