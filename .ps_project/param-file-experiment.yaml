@@ -6,7 +6,7 @@ experimentEnv:
   MAX_STEPS: 1000
   TRAIN_EPOCHS: 10
 machineType: p2.xlarge
-clusterId : clcjo828k
+clusterId : clqr4b0ox
 modelPath: /artifacts
 modelType: Tensorflow
 name: mnist-paramfile-gradientci
